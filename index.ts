@@ -44,7 +44,7 @@ function constructHTML(concepts: Concept[]) {
     for (let concept of concepts) {
         res += `\t\t\t<div class="item" concept-id=${concept.id} style="position: relative">\n\t\t\t\t<div class="image" style="background-image: url(${concept.image})"></div>\n<div class="overlay"><div class="concept-name">${escapeHTML(concept.name)}</div><div class="concept-type">${escapeHTML(concept.type || "")}</div></div>\n</div>`;
 
-        js += `${concept.id}: {\nname: "${concept.name}",image: "${concept.image}", \ntype: "${escapeHTML(concept.type || "")}",\nsource: "${escapeHTML(concept.source || "")}",\ntriggers: [${concept.triggers.map(t => `"${escapeHTML(t)}"`).join(", ")}],\ndesc: \`${concept.desc}\`\n},\n`;
+        js += `${concept.id}: {\nname: "${concept.name}",nsfw:\n${concept.nsfw}, image: "${concept.image}", \ntype: "${escapeJS(concept.type || "")}",\nsource: "${escapeJS(concept.source || "")}",\ntriggers: [${concept.triggers.map(t => `"${escapeJS(t)}"`).join(", ")}],\ndesc: \`${escapeJS(concept.desc)}\`\n},\n`;
     }
 
     js += "};";
@@ -60,4 +60,8 @@ function constructHTML(concepts: Concept[]) {
 
 function escapeHTML(str: string): string {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeJS(str: string): string {
+    return str.replace(/`/g, "\\`").replace(/"/g, "\\\"");
 }

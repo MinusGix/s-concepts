@@ -3,6 +3,45 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', openItemModal);
     }
+
+    let toggles = document.getElementsByClassName('toggle');
+    for (let i = 0; i < toggles.length; i++) {
+        toggles[i].addEventListener('click', function () {
+            // Get the child input element
+            let input = this.getElementsByTagName('input')[0];
+            // Toggle the checked property
+            input.checked = !input.checked;
+            // Trigger the change event manually
+            input.dispatchEvent(new Event('change'));
+        });
+    }
+
+    let nsfw = document.getElementById("nsfw");
+    nsfw.addEventListener("change", function () {
+        updateFiltering();
+        localStorage.setItem("nsfw", nsfw.checked);
+    });
+
+    let nsfw_previews = document.getElementById("nsfw-previews");
+    nsfw_previews.addEventListener("change", function () {
+        updateFiltering();
+        localStorage.setItem("nsfw-previews", nsfw_previews.checked);
+    });
+
+
+    if (localStorage.getItem("nsfw") === "false") {
+        nsfw.checked = false;
+    } else {
+        nsfw.checked = true;
+    }
+
+    if (localStorage.getItem("nsfw-previews") === "false") {
+        nsfw_previews.checked = false;
+    } else {
+        nsfw_previews.checked = true;
+    }
+
+    updateFiltering();
 });
 
 MicroModal.init();
@@ -62,4 +101,26 @@ function openItemModal() {
 
 
     MicroModal.show('concept-modal');
+}
+
+function updateFiltering() {
+    let nsfw = document.getElementById("nsfw").checked;
+    let nsfw_previews = document.getElementById("nsfw-previews").checked;
+    let ITEMS = document.getElementsByClassName('item');
+
+    console.log("update filtering, nsfw:", nsfw, "nsfw_previews:", nsfw_previews, "#items:", ITEMS.length);
+    for (let i = 0; i < ITEMS.length; i++) {
+        let item = ITEMS[i];
+        let id = item.getAttribute('concept-id');
+        let concept = concepts[id];
+        if (concept.nsfw && !nsfw) {
+            item.classList.add("hidden");
+        } else if (concept.nsfw && nsfw && !nsfw_previews) {
+            item.classList.add("hidden");
+            item.classList.add("blur");
+        } else {
+            item.classList.remove("hidden");
+            item.classList.remove("blur");
+        }
+    }
 }

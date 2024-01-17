@@ -11,6 +11,6 @@ bun run index.ts
 It will scrape on the first launch.  
 You can also run  
 ```bash
-bun run index.js scrape
+bun run index.ts scrape
 ```
 to force a scrape.
