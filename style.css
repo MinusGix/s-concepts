@@ -1066,3 +1066,8 @@ code {
     filter: blur(8px);
     margin: 8px 0px 0px 8px;
 }
+
+#concept-list-search {
+    flex-basis: 500px;
+    flex-grow: 1;
+}

@@ -1,3 +1,16 @@
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        const later = () => {
+            timeout = null;
+            func.apply(this, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
     let elements = document.getElementsByClassName('item');
     for (let i = 0; i < elements.length; i++) {
@@ -27,6 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
         updateFiltering();
         localStorage.setItem("nsfw-previews", nsfw_previews.checked);
     });
+
+    let search = document.getElementById("concept-list-search");
+    // Debounced search just calls updateFiltering
+    search.addEventListener("input", debounce(updateFiltering, 250));
 
 
     if (localStorage.getItem("nsfw") === "false") {
@@ -103,9 +120,11 @@ function openItemModal() {
     MicroModal.show('concept-modal');
 }
 
+// TODO: update count
 function updateFiltering() {
     let nsfw = document.getElementById("nsfw").checked;
     let nsfw_previews = document.getElementById("nsfw-previews").checked;
+    let searchInput = document.getElementById("concept-list-search").value.toLowerCase();
     let ITEMS = document.getElementsByClassName('item');
 
     console.log("update filtering, nsfw:", nsfw, "nsfw_previews:", nsfw_previews, "#items:", ITEMS.length);
@@ -113,14 +132,24 @@ function updateFiltering() {
         let item = ITEMS[i];
         let id = item.getAttribute('concept-id');
         let concept = concepts[id];
-        if (concept.nsfw && !nsfw) {
-            item.classList.add("hidden");
-        } else if (concept.nsfw && nsfw && !nsfw_previews) {
-            item.classList.add("hidden");
-            item.classList.add("blur");
-        } else {
+        // TODO: store description as a separate lowercase version to make this cheaper?
+        // though the cost might be swamped by the DOM manipulation
+        let name = concept.name;
+        let description = concept.desc.toLowerCase();
+
+        let visible = (nsfw || !concept.nsfw) && (name.includes(searchInput) || description.includes(searchInput));
+        let blurred = visible && concept.nsfw && !nsfw_previews;
+
+        if (visible) {
             item.classList.remove("hidden");
-            item.classList.remove("blur");
+        } else {
+            item.classList.add("hidden");
+        }
+
+        if (blurred) {
+            item.classList.add("blurred");
+        } else {
+            item.classList.remove("blurred");
         }
     }
 }
